@@ -1,9 +1,9 @@
 {
   "status": "success",
-  "generated_at": "2026-02-21T14:20:53.018619",
-  "total_fixtures": 159,
+  "generated_at": "2026-02-21T14:50:57.379261",
+  "total_fixtures": 174,
   "total_leagues": 23,
-  "total_dates": 2,
+  "total_dates": 3,
   "leagues": [
     {
       "id": 40,
@@ -13,7 +13,7 @@
     {
       "id": 140,
       "name": "Copa De La Liga Auf (Uruguay)",
-      "count": 8
+      "count": 9
     },
     {
       "id": 61,
@@ -23,7 +23,7 @@
     {
       "id": 62,
       "name": "Ligue 2 (Algeria)",
-      "count": 3
+      "count": 4
     },
     {
       "id": 41,
@@ -33,7 +33,7 @@
     {
       "id": 42,
       "name": "中國League Two",
-      "count": 11
+      "count": 12
     },
     {
       "id": 310,
@@ -48,12 +48,12 @@
     {
       "id": 262,
       "name": "墨西哥Liga MX Femenil",
-      "count": 7
+      "count": 8
     },
     {
       "id": 135,
       "name": "墨西哥Liga Premier Serie A",
-      "count": 7
+      "count": 9
     },
     {
       "id": 136,
@@ -83,7 +83,7 @@
     {
       "id": 307,
       "name": "比甲",
-      "count": 3
+      "count": 7
     },
     {
       "id": 188,
@@ -93,12 +93,12 @@
     {
       "id": 39,
       "name": "澳大利亞超級聯賽",
-      "count": 9
+      "count": 10
     },
     {
       "id": 89,
       "name": "荷乙",
-      "count": 2
+      "count": 4
     },
     {
       "id": 88,
@@ -108,7 +108,7 @@
     {
       "id": 94,
       "name": "葡超",
-      "count": 7
+      "count": 8
     },
     {
       "id": 179,
@@ -118,7 +118,7 @@
     {
       "id": 141,
       "name": "西乙",
-      "count": 9
+      "count": 10
     }
   ]
 }

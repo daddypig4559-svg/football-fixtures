@@ -28,7 +28,7 @@ from data_processor.db_reader import get_fixtures, get_fixtures_by_league, get_f
 class HTMLBuilder:
     """HTML生成器類"""
     
-    def __init__(self, template_dir='templates', output_dir='public'):
+    def __init__(self, template_dir='../templates', output_dir='../public'):
         """
         初始化生成器
         
