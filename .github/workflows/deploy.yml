@@ -1,0 +1,173 @@
+name: Deploy Football Fixtures
+
+on:
+  # 手動觸發
+  workflow_dispatch:
+  
+  # 定時觸發：每6小時運行一次
+  schedule:
+    - cron: '0 */6 * * *'
+  
+  # 代碼推送時觸發
+  push:
+    branches: [ main ]
+  
+  # 拉取請求時觸發
+  pull_request:
+    branches: [ main ]
+
+# 環境變量
+env:
+  PYTHON_VERSION: '3.9'
+  NODE_VERSION: '18'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 檢出代碼
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # 獲取完整歷史
+        
+    - name: 🐍 設置Python環境
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 安裝Python依賴
+      run: |
+        python -m pip install --upgrade pip
+        pip install jinja2
+        
+    - name: 🔧 檢查數據庫文件
+      run: |
+        echo "檢查數據庫文件..."
+        if [ -f "data/fixtures.db" ]; then
+          echo "✅ 找到本地數據庫文件"
+          ls -la data/fixtures.db
+        else
+          echo "⚠️ 未找到本地數據庫，使用API同步模式"
+        fi
+        
+    - name: 🚀 運行靜態生成器
+      run: |
+        echo "開始生成靜態網站..."
+        cd static_generator
+        python html_builder.py --days 7
+        cd ..
+        
+        # 檢查生成的文件
+        echo "生成的文件:"
+        find public -type f | head -20
+        
+    - name: 📊 生成部署報告
+      run: |
+        echo "生成部署報告..."
+        cat > public/deployment-info.json << EOF
+        {
+          "deployment": {
+            "status": "success",
+            "timestamp": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
+            "trigger": "${{ github.event_name }}",
+            "runner": "ubuntu-latest",
+            "python_version": "${{ env.PYTHON_VERSION }}"
+          },
+          "files": {
+            "total": "$(find public -type f | wc -l)",
+            "html": "$(find public -name '*.html' | wc -l)",
+            "json": "$(find public -name '*.json' | wc -l)",
+            "css": "$(find public -name '*.css' | wc -l)",
+            "js": "$(find public -name '*.js' | wc -l)"
+          },
+          "github": {
+            "repository": "${{ github.repository }}",
+            "ref": "${{ github.ref }}",
+            "sha": "${{ github.sha }}",
+            "run_id": "${{ github.run_id }}"
+          }
+        }
+        EOF
+        
+    - name: 🚀 部署到GitHub Pages
+      if: github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./public
+        publish_branch: gh-pages
+        force_orphan: true
+        user_name: 'github-actions[bot]'
+        user_email: 'github-actions[bot]@users.noreply.github.com'
+        
+    - name: 📧 發送部署通知
+      if: always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // 讀取部署信息
+          let deploymentInfo = {};
+          try {
+            deploymentInfo = JSON.parse(fs.readFileSync('public/deployment-info.json', 'utf8'));
+          } catch (e) {
+            deploymentInfo = { error: '無法讀取部署信息' };
+          }
+          
+          // 創建部署總結
+          const summary = `
+          ### 🚀 足球賽事數據中心部署完成
+          
+          **部署狀態**: ${job.status === 'success' ? '✅ 成功' : '❌ 失敗'}
+          **觸發方式**: ${github.event_name}
+          **部署時間**: ${new Date().toISOString()}
+          **Git提交**: ${github.sha.substring(0, 7)}
+          
+          **文件統計**:
+          - 總文件數: ${deploymentInfo.files?.total || 'N/A'}
+          - HTML文件: ${deploymentInfo.files?.html || 'N/A'}
+          - JSON API: ${deploymentInfo.files?.json || 'N/A'}
+          
+          **訪問地址**:
+          - 🌐 網站主頁: https://daddypig4559-svg.github.io/football-fixtures/
+          - 🔗 GitHub倉庫: https://github.com/daddypig4559-svg/football-fixtures
+          - 📊 JSON API: https://daddypig4559-svg.github.io/football-fixtures/api/fixtures.json
+          
+          **下次更新**: 6小時後自動更新
+          `;
+          
+          // 創建部署評論
+          github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number || context.runId,
+            body: summary
+          });
+          
+    - name: 🎉 部署完成
+      if: success()
+      run: |
+        echo "🎉 部署成功完成！"
+        echo ""
+        echo "🌐 訪問地址:"
+        echo "   https://daddypig4559-svg.github.io/football-fixtures/"
+        echo ""
+        echo "📊 JSON API:"
+        echo "   https://daddypig4559-svg.github.io/football-fixtures/api/fixtures.json"
+        echo ""
+        echo "⏰ 下次自動更新: 6小時後"
+        
+    - name: 🚨 部署失敗處理
+      if: failure()
+      run: |
+        echo "❌ 部署失敗！"
+        echo ""
+        echo "請檢查以下項目:"
+        echo "1. 代碼語法錯誤"
+        echo "2. 文件權限問題"
+        echo "3. GitHub Token權限"
+        echo "4. 網絡連接問題"
+        echo ""
+        echo "查看詳細錯誤日誌請訪問Actions頁面"

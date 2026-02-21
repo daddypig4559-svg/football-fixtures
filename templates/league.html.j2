@@ -1,0 +1,828 @@
+{% extends "base.html.j2" %}
+
+{% block title %}{{ league.name }} - 賽事列表{% endblock %}
+
+{% block header_title %}{{ league.name }}{% endblock %}
+
+{% block header_subtitle %}
+{{ league.fixtures|length }} 場賽事，最新賽程與比分信息
+{% endblock %}
+
+{% block content %}
+<div class="league-header">
+    <div class="league-info-card">
+        <div class="league-icon">
+            <span class="icon-text">🏆</span>
+        </div>
+        <div class="league-details">
+            <h2>{{ league.name }}</h2>
+            {% if league.country %}
+            <p class="league-country">
+                <span class="flag-icon">🌍</span>
+                {{ league.country }}
+            </p>
+            {% endif %}
+            <p class="league-stats">
+                <span class="stat-item">
+                    <span class="stat-label">賽事數:</span>
+                    <span class="stat-value">{{ league.fixtures|length }}</span>
+                </span>
+                <span class="stat-item">
+                    <span class="stat-label">最近更新:</span>
+                    <span class="stat-value">{{ generated_at[:10] }}</span>
+                </span>
+            </p>
+        </div>
+    </div>
+    
+    <div class="league-actions">
+        <a href="/" class="back-btn">
+            <span class="btn-icon">←</span>
+            返回首頁
+        </a>
+        <a href="/api/leagues.json" class="api-btn" target="_blank">
+            <span class="btn-icon">🔗</span>
+            JSON數據
+        </a>
+    </div>
+</div>
+
+<!-- 賽事篩選 -->
+<div class="league-filters">
+    <div class="filter-group">
+        <label>比賽狀態:</label>
+        <select id="status-filter" class="filter-select">
+            <option value="all">全部賽事</option>
+            <option value="NS">未開始</option>
+            <option value="live">進行中</option>
+            <option value="FT">已結束</option>
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>日期範圍:</label>
+        <select id="date-filter" class="filter-select">
+            <option value="all">全部日期</option>
+            <option value="today">今日</option>
+            <option value="tomorrow">明日</option>
+            <option value="week">本週</option>
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>排序方式:</label>
+        <select id="sort-filter" class="filter-select">
+            <option value="date_asc">日期升序</option>
+            <option value="date_desc">日期降序</option>
+            <option value="time_asc">時間升序</option>
+            <option value="time_desc">時間降序</option>
+        </select>
+    </div>
+</div>
+
+<!-- 賽事列表 -->
+<div class="league-fixtures">
+    <h3>賽事列表</h3>
+    
+    {% if league.fixtures %}
+        <div class="fixtures-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>時間</th>
+                        <th>主隊</th>
+                        <th>比分</th>
+                        <th>客隊</th>
+                        <th>狀態</th>
+                        <th>場地</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fixture in league.fixtures %}
+                    <tr class="fixture-row" 
+                        data-date="{{ fixture.event_date_formatted }}"
+                        data-time="{{ fixture.event_time_formatted }}"
+                        data-status="{{ fixture.status_short }}"
+                        data-home-team="{{ fixture.home_team_name_tc }}"
+                        data-away-team="{{ fixture.away_team_name_tc }}">
+                        <td class="fixture-date">
+                            {{ fixture.event_date_formatted|format_date }}
+                        </td>
+                        <td class="fixture-time">
+                            {{ fixture.event_time_formatted }}
+                        </td>
+                        <td class="home-team">
+                            <div class="team-name">{{ fixture.home_team_name_tc }}</div>
+                            {% if fixture.home_team_country %}
+                            <div class="team-country">{{ fixture.home_team_country }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="fixture-score">
+                            {% if fixture.goals_home is not none and fixture.goals_away is not none %}
+                            <span class="score home-score">{{ fixture.goals_home }}</span>
+                            <span class="score-separator">:</span>
+                            <span class="score away-score">{{ fixture.goals_away }}</span>
+                            {% else %}
+                            <span class="vs-text">VS</span>
+                            {% endif %}
+                        </td>
+                        <td class="away-team">
+                            <div class="team-name">{{ fixture.away_team_name_tc }}</div>
+                            {% if fixture.away_team_country %}
+                            <div class="team-country">{{ fixture.away_team_country }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="fixture-status">
+                            <span class="status-badge status-{{ fixture.status_short|lower }}">
+                                {{ fixture.status_long }}
+                            </span>
+                        </td>
+                        <td class="fixture-venue">
+                            {% if fixture.venue_name %}
+                            <span class="venue-name">{{ fixture.venue_name }}</span>
+                            {% if fixture.venue_city %}
+                            <span class="venue-city">{{ fixture.venue_city }}</span>
+                            {% endif %}
+                            {% else %}
+                            <span class="no-venue">待定</span>
+                            {% endif %}
+                        </td>
+                        <td class="fixture-actions">
+                            <button class="action-btn view-btn" onclick="viewFixture('{{ fixture.api_id }}')">
+                                查看
+                            </button>
+                            <button class="action-btn share-btn" onclick="shareFixture('{{ fixture.api_id }}')">
+                                分享
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 數據統計 -->
+        <div class="league-stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">未開始</div>
+                <div class="stat-value">
+                    {{ league.fixtures|selectattr('status_short', 'equalto', 'NS')|list|length }}
+                </div>
+                <div class="stat-percent">
+                    {{ (league.fixtures|selectattr('status_short', 'equalto', 'NS')|list|length / league.fixtures|length * 100)|round(1) }}%
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-title">進行中</div>
+                <div class="stat-value">
+                    {{ league.fixtures|selectattr('status_short', 'in', ['1H', 'HT', '2H', 'ET', 'BT', 'P'])|list|length }}
+                </div>
+                <div class="stat-percent">
+                    {{ (league.fixtures|selectattr('status_short', 'in', ['1H', 'HT', '2H', 'ET', 'BT', 'P'])|list|length / league.fixtures|length * 100)|round(1) }}%
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-title">已結束</div>
+                <div class="stat-value">
+                    {{ league.fixtures|selectattr('status_short', 'equalto', 'FT')|list|length }}
+                </div>
+                <div class="stat-percent">
+                    {{ (league.fixtures|selectattr('status_short', 'equalto', 'FT')|list|length / league.fixtures|length * 100)|round(1) }}%
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-title">平均進球</div>
+                <div class="stat-value">
+                    {% set scored_fixtures = league.fixtures|rejectattr('goals_home', 'none')|rejectattr('goals_away', 'none')|list %}
+                    {% if scored_fixtures %}
+                        {{ (scored_fixtures|sum(attribute='goals_home') + scored_fixtures|sum(attribute='goals_away')) / scored_fixtures|length|round(2) }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </div>
+                <div class="stat-percent">每場</div>
+            </div>
+        </div>
+    {% else %}
+        <div class="no-fixtures">
+            <div class="no-data-icon">📅</div>
+            <h3>暫無賽事數據</h3>
+            <p>當前聯賽在未來7天內沒有賽事安排</p>
+            <p>請檢查其他聯賽或稍後再試</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- 日期分佈圖 -->
+{% if league.fixtures %}
+<div class="date-distribution">
+    <h3>賽事日期分佈</h3>
+    <div class="distribution-chart">
+        {% set dates = {} %}
+        {% for fixture in league.fixtures %}
+            {% set date = fixture.event_date_formatted %}
+            {% if date not in dates %}
+                {% set _ = dates.update({date: 1}) %}
+            {% else %}
+                {% set _ = dates.update({date: dates[date] + 1}) %}
+            {% endif %}
+        {% endfor %}
+        
+        {% for date, count in dates.items()|sort %}
+        <div class="chart-item">
+            <div class="chart-date">{{ date|format_date }}</div>
+            <div class="chart-bar">
+                <div class="bar-fill" style="height: {{ count * 20 }}px;"></div>
+                <div class="bar-count">{{ count }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<style>
+    .league-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .league-info-card {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    
+    .league-icon {
+        font-size: 3rem;
+        background: linear-gradient(135deg, #3498db, #2ecc71);
+        color: white;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .league-details h2 {
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+    }
+    
+    .league-country {
+        color: #666;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .league-stats {
+        display: flex;
+        gap: 1.5rem;
+    }
+    
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .stat-value {
+        font-weight: 600;
+        color: #3498db;
+    }
+    
+    .league-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .back-btn, .api-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .back-btn {
+        background: #f8f9fa;
+        color: #333;
+        border: 1px solid #ddd;
+    }
+    
+    .back-btn:hover {
+        background: #e9ecef;
+    }
+    
+    .api-btn {
+        background: #3498db;
+        color: white;
+        border: 1px solid #3498db;
+    }
+    
+    .api-btn:hover {
+        background: #2980b9;
+    }
+    
+    .league-filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        flex-wrap: wrap;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-width: 150px;
+    }
+    
+    .filter-group label {
+        font-weight: 600;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .filter-select {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+    }
+    
+    .filter-select:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+    
+    .league-fixtures {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .fixtures-table {
+        overflow-x: auto;
+        margin-bottom: 2rem;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    th {
+        background: #f8f9fa;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+    }
+    
+    td {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .fixture-row:hover {
+        background: #f8f9fa;
+    }
+    
+    .fixture-date, .fixture-time {
+        white-space: nowrap;
+        font-weight: 600;
+    }
+    
+    .home-team, .away-team {
+        min-width: 150px;
+    }
+    
+    .team-name {
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+    }
+    
+    .team-country {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .fixture-score {
+        text-align: center;
+        min-width: 80px;
+    }
+    
+    .score {
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+    
+    .home-score {
+        color: #3498db;
+    }
+    
+    .away-score {
+        color: #e74c3c;
+    }
+    
+    .score-separator {
+        margin: 0 0.5rem;
+        font-weight: 700;
+        color: #666;
+    }
+    
+    .vs-text {
+        color: #666;
+        font-weight: 700;
+    }
+    
+    .fixture-status {
+        min-width: 100px;
+    }
+    
+    .status-badge {
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .status-ns {
+        background: #95a5a6;
+        color: white;
+    }
+    
+    .status-1h, .status-ht, .status-2h, .status-et, .status-bt, .status-p {
+        background: #e74c3c;
+        color: white;
+    }
+    
+    .status-ft {
+        background: #27ae60;
+        color: white;
+    }
+    
+    .fixture-venue {
+        min-width: 150px;
+    }
+    
+    .venue-name {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+    }
+    
+    .venue-city {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .no-venue {
+        color: #95a5a6;
+        font-style: italic;
+    }
+    
+    .fixture-actions {
+        min-width: 120px;
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .action-btn {
+        padding: 0.3rem 0.8rem;
+        border: 1px solid #ddd;
+        background: white;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .view-btn:hover {
+        background: #3498db;
+        color: white;
+        border-color: #3498db;
+    }
+    
+    .share-btn:hover {
+        background: #9b59b6;
+        color: white;
+        border-color: #9b59b6;
+    }
+    
+    .league-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        text-align: center;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .stat-title {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #3498db;
+        margin-bottom: 0.3rem;
+    }
+    
+    .stat-percent {
+        font-size: 0.9rem;
+        color: #95a5a6;
+    }
+    
+    .no-fixtures {
+        text-align: center;
+        padding: 3rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .no-data-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+    
+    .date-distribution {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .distribution-chart {
+        display: flex;
+        align-items: flex-end;
+        gap: 1rem;
+        height: 200px;
+        padding: 1rem;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        margin-top: 1rem;
+        overflow-x: auto;
+    }
+    
+    .chart-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .chart-date {
+        font-size: 0.8rem;
+        color: #666;
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+    }
+    
+    .chart-bar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .bar-fill {
+        width: 30px;
+        background: linear-gradient(to top, #3498db, #2ecc71);
+        border-radius: 4px 4px 0 0;
+        min-height: 10px;
+    }
+    
+    .bar-count {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    @media (max-width: 768px) {
+        .league-header {
+            flex-direction: column;
+            gap: 1.5rem;
+            text-align: center;
+        }
+        
+        .league-info-card {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .league-stats {
+            justify-content: center;
+        }
+        
+        .league-filters {
+            flex-direction: column;
+        }
+        
+        .filter-group {
+            min-width: 100%;
+        }
+        
+        table {
+            display: block;
+        }
+        
+        th, td {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .fixture-actions {
+            flex-direction: column;
+        }
+        
+        .league-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 狀態篩選
+    document.getElementById('status-filter').addEventListener('change', function() {
+        filterFixtures();
+    });
+    
+    // 日期篩選
+    document.getElementById('date-filter').addEventListener('change', function() {
+        filterFixtures();
+    });
+    
+    // 排序篩選
+    document.getElementById('sort-filter').addEventListener('change', function() {
+        sortFixtures();
+    });
+    
+    // 初始化
+    filterFixtures();
+});
+
+function filterFixtures() {
+    const statusFilter = document.getElementById('status-filter').value;
+    const dateFilter = document.getElementById('date-filter').value;
+    const rows = document.querySelectorAll('.fixture-row');
+    
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    
+    const weekLater = new Date(now);
+    weekLater.setDate(weekLater.getDate() + 7);
+    const weekLaterStr = weekLater.toISOString().split('T')[0];
+    
+    rows.forEach(row => {
+        const status = row.dataset.status;
+        const date = row.dataset.date;
+        
+        let statusMatch = true;
+        let dateMatch = true;
+        
+        // 狀態篩選
+        if (statusFilter === 'live') {
+            statusMatch = ['1H', 'HT', '2H', 'ET', 'BT', 'P'].includes(status);
+        } else if (statusFilter === 'NS') {
+            statusMatch = status === 'NS';
+        } else if (statusFilter === 'FT') {
+            statusMatch = status === 'FT';
+        }
+        
+        // 日期篩選
+        if (dateFilter === 'today') {
+            dateMatch = date === today;
+        } else if (dateFilter === 'tomorrow') {
+            dateMatch = date === tomorrowStr;
+        } else if (dateFilter === 'week') {
+            dateMatch = date >= today && date <= weekLaterStr;
+        }
+        
+        // 顯示/隱藏行
+        row.style.display = (statusMatch && dateMatch) ? '' : 'none';
+    });
+}
+
+function sortFixtures() {
+    const sortFilter = document.getElementById('sort-filter').value;
+    const tbody = document.querySelector('tbody');
+    const rows = Array.from(document.querySelectorAll('.fixture-row'));
+    
+    rows.sort((a, b) => {
+        const dateA = a.dataset.date;
+        const timeA = a.dataset.time;
+        const dateB = b.dataset.date;
+        const timeB = b.dataset.time;
+        
+        if (sortFilter === 'date_asc') {
+            if (dateA !== dateB) return dateA.localeCompare(dateB);
+            return timeA.localeCompare(timeB);
+        } else if (sortFilter === 'date_desc') {
+            if (dateA !== dateB) return dateB.localeCompare(dateA);
+            return timeB.localeCompare(timeA);
+        } else if (sortFilter === 'time_asc') {
+            if (timeA !== timeB) return timeA.localeCompare(timeB);
+            return dateA.localeCompare(dateB);
+        } else if (sortFilter === 'time_desc') {
+            if (timeA !== timeB) return timeB.localeCompare(timeA);
+            return dateB.localeCompare(dateA);
+        }
+        
+        return 0;
+    });
+    
+    // 重新插入排序後的行
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+function viewFixture(fixtureId) {
+    alert('賽事詳細功能開發中，將顯示更多統計數據。');
+    // 可以實現跳轉到詳細頁面或顯示模態框
+}
+
+function shareFixture(fixtureId) {
+    const row = document.querySelector(`.fixture-row[data-home-team*="${fixtureId}"]`) || 
+                 document.querySelector(`[data-fixture-id="${fixtureId}"]`);
+    
+    if (!row) return;
+    
+    const homeTeam = row.dataset.homeTeam;
+    const awayTeam = row.dataset.awayTeam;
+    const leagueName = '{{ league.name }}';
+    const date = row.dataset.date;
+    const time = row.dataset.time;
+    
+    const shareText = `⚽ ${leagueName}\n🏠 ${homeTeam} vs ${awayTeam}\n📅 ${date} ${time}\n🔗 ${window.location.href}`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: '足球賽事',
+            text: shareText,
+            url: window.location.href
+        });
+    } else {
+        navigator.clipboard.writeText(shareText)
+            .then(() => alert('賽事信息已複製到剪貼板！'))
+            .catch(err => console.error('複製失敗:', err));
+    }
+}
+</script>
+{% endblock %}

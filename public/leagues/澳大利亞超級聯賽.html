@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳大利亞超級聯賽 - 賽事列表</title>
+    <meta name="description" content="實時更新的足球賽事信息，涵蓋全球59個主要聯賽，提供繁體中文界面。">
+    <meta name="keywords" content="足球,賽事,賽程,比分,聯賽,球隊,繁體中文">
+    <meta name="author" content="Football Fixtures Hub">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="足球賽事數據中心">
+    <meta property="og:description" content="實時更新的足球賽事信息，涵蓋全球59個主要聯賽">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://daddypig4559-svg.github.io/football-fixtures/">
+    <meta property="og:image" content="https://daddypig4559-svg.github.io/football-fixtures/images/og-image.png">
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="main-nav">
+        <div class="container">
+            <div class="nav-content">
+                <a href="/" class="logo">
+                    <span class="logo-icon">⚽</span>
+                    <span class="logo-text">足球賽事數據中心</span>
+                </a>
+                
+                <div class="nav-links">
+                    <a href="/" class="nav-link active">
+                        首頁
+                    </a>
+                    <a href="#leagues" class="nav-link">
+                        聯賽
+                    </a>
+                    <a href="#today" class="nav-link">
+                        今日賽事
+                    </a>
+                    <a href="/api/fixtures.json" class="nav-link" target="_blank">
+                        JSON API
+                    </a>
+                </div>
+                
+                <div class="nav-actions">
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="搜索球隊或聯賽...">
+                        <button class="search-btn">🔍</button>
+                    </div>
+                    
+                    <div class="last-updated">
+                        更新於: <span id="last-updated">2026-02-21 14:20:53</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 頁頭 -->
+    <header>
+        <div class="container">
+            <h1>澳大利亞超級聯賽</h1>
+            <p class="subtitle">
+9 場賽事，最新賽程與比分信息
+            </p>
+            
+            <!-- 快速統計 -->
+            <div class="quick-stats">
+                <div class="stat-item">
+                    <span class="stat-number">0</span>
+                    <span class="stat-label">場賽事</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">0</span>
+                    <span class="stat-label">個聯賽</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">7</span>
+                    <span class="stat-label">天內</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">2026-02-21</span>
+                    <span class="stat-label">最新更新</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容 -->
+    <main class="container">
+<div class="league-header">
+    <div class="league-info-card">
+        <div class="league-icon">
+            <span class="icon-text">🏆</span>
+        </div>
+        <div class="league-details">
+            <h2>澳大利亞超級聯賽</h2>
+            <p class="league-country">
+                <span class="flag-icon">🌍</span>
+                England
+            </p>
+            <p class="league-stats">
+                <span class="stat-item">
+                    <span class="stat-label">賽事數:</span>
+                    <span class="stat-value">9</span>
+                </span>
+                <span class="stat-item">
+                    <span class="stat-label">最近更新:</span>
+                    <span class="stat-value">2026-02-21</span>
+                </span>
+            </p>
+        </div>
+    </div>
+    
+    <div class="league-actions">
+        <a href="/" class="back-btn">
+            <span class="btn-icon">←</span>
+            返回首頁
+        </a>
+        <a href="/api/leagues.json" class="api-btn" target="_blank">
+            <span class="btn-icon">🔗</span>
+            JSON數據
+        </a>
+    </div>
+</div>
+
+<!-- 賽事篩選 -->
+<div class="league-filters">
+    <div class="filter-group">
+        <label>比賽狀態:</label>
+        <select id="status-filter" class="filter-select">
+            <option value="all">全部賽事</option>
+            <option value="NS">未開始</option>
+            <option value="live">進行中</option>
+            <option value="FT">已結束</option>
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>日期範圍:</label>
+        <select id="date-filter" class="filter-select">
+            <option value="all">全部日期</option>
+            <option value="today">今日</option>
+            <option value="tomorrow">明日</option>
+            <option value="week">本週</option>
+        </select>
+    </div>
+    
+    <div class="filter-group">
+        <label>排序方式:</label>
+        <select id="sort-filter" class="filter-select">
+            <option value="date_asc">日期升序</option>
+            <option value="date_desc">日期降序</option>
+            <option value="time_asc">時間升序</option>
+            <option value="time_desc">時間降序</option>
+        </select>
+    </div>
+</div>
+
+<!-- 賽事列表 -->
+<div class="league-fixtures">
+    <h3>賽事列表</h3>
+    
+        <div class="fixtures-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>時間</th>
+                        <th>主隊</th>
+                        <th>比分</th>
+                        <th>客隊</th>
+                        <th>狀態</th>
+                        <th>場地</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="fixture-row" 
+                        data-date="2026-02-21"
+                        data-time="15:00"
+                        data-status="NS"
+                        data-home-team="車路士"
+                        data-away-team="般尼">
+                        <td class="fixture-date">
+                            02月21日
+                        </td>
+                        <td class="fixture-time">
+                            15:00
+                        </td>
+                        <td class="home-team">
+                            <div class="team-name">車路士</div>
+                        </td>
+                        <td class="fixture-score">
+                            <span class="vs-text">VS</span>
+                        </td>
+                        <td class="away-team">
+                            <div class="team-name">般尼</div>
+                        </td>
+                        <td class="fixture-status">
+                            <span class="status-badge status-ns">
+                                Not Started
+                            </span>
+                        </td>
+                        <td class="fixture-venue">
+                            <span class="venue-name">Stamford Bridge</span>
+                            <span class="venue-city">London</span>
+                        </td>
+                        <td class="fixture-actions">
+                            <button class="action-btn view-btn" onclick="viewFixture('1379231')">
+                                查看
+                            </button>
+                            <button class="action-btn share-btn" onclick="shareFixture('1379231')">
+                                分享
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="fixture-row" 
+                        data-date="2026-02-21"
+                        data-time="15:00"
+                        data-status="NS"
+                        data-home-team="賓福特"
+                        data-away-team="白禮頓">
+                        <td class="fixture-date">
+                            02月21日
+                        </td>
+                        <td class="fixture-time">
+                            15:00
+                        </td>
+                        <td class="home-team">
+                            <div class="team-name">賓福特</div>
+                        </td>
+                        <td class="fixture-score">
+                            <span class="vs-text">VS</span>
+                        </td>
+                        <td class="away-team">
+                            <div class="team-name">白禮頓</div>
+                        </td>
+                        <td class="fixture-status">
+                            <span class="status-badge status-ns">
+                                Not Started
+                            </span>
+                        </td>
+                        <td class="fixture-venue">
+                            <span class="venue-name">Brentford Community Stadium</span>
+                            <span class="venue-city">London</span>
+                        </td>
+                        <td class="fixture-actions">
+                            <button class="action-btn view-btn" onclick="viewFixture('1379230')">
+                                查看
+                            </button>
+                            <button class="action-btn share-btn" onclick="shareFixture('1379230')">
+                                分享
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="fixture-row" 
+                        data-date="2026-02-21"
+                        data-time="15:00"
+                        data-status="NS"
+                        data-home-team="阿士東維拉"
+                        data-away-team="列斯聯">
+                        <td class="fixture-date">
+                            02月21日
+                        </td>
+                        <td class="fixture-time">
+                            15:00
+                        </td>
+                        <td class="home-team">
+                            <div class="team-name">阿士東維拉</div>
+                        </td>
+                        <td class="fixture-score">
+                            <span class="vs-text">VS</span>
+                        </td>
+                        <td class="away-team">
+                            <div class="team-name">列斯聯</div>
+                        </td>
+                        <td class="fixture-status">
+                            <span class="status-badge status-ns">
+                                Not Started
+                            </span>
+                        </td>
+                        <td class="fixture-venue">
+                            <span class="venue-name">Villa Park</span>
+                            <span class="venue-city">Birmingham</span>
+                        </td>
+                        <td class="fixture-actions">
+                            <button class="action-btn view-btn" onclick="viewFixture('1379229')">
+                                查看
+                            </button>
+                            <button class="action-btn share-btn" onclick="shareFixture('1379229')">
+                                分享
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="fixture-row" 
+                        data-date="2026-02-21"
+                        data-time="17:30"
+                        data-status="NS"
+                        data-home-team="韋斯咸"
+                        data-away-team="般尼茅夫">
+                        <td class="fixture-date">
+                            02月21日
+                        </td>
+                        <td class="fixture-time">
+                            17:30
+                        </td>
+                        <td class="home-team">
+                            <div class="team-name">韋斯咸</div>
+                        </td>
+                        <td class="fixture-score">
+                            <span class="vs-text">VS</span>
+                        </td>
+                        <td class="away-team">
+                            <div class="team-name">般尼茅夫</div>
+                        </td>
+                        <td class="fixture-status">
+                            <span class="status-badge status-ns">
+                                Not Started
+                            </span>
+                        </td>
+                        <td class="fixture-venue">
+                            <span class="venue-name">London Stadium</span>
+                            <span class="venue-city">London</span>
+                        </td>
+                        <td class="fixture-actions">
+                            <button class="action-btn view-btn" onclick="viewFixture('1379238')">
+                                查看
+                            </button>
+                            <button class="action-btn share-btn" onclick="shareFixture('1379238')">
+                                分享
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="fixture-row" 
+                        data-date="2026-02-21"
+                        data-time="20:00"
+                        data-status="NS"
+                        data-home-team="曼城"
+                        data-away-team="紐卡素">
+                        <td class="fixture-date">
+                            02月21日
+                        </td>
+                        <td class="fixture-time">
+                            20:00
+                        </td>
+                        <td class="home-team">
+                            <div class="team-name">曼城</div>
+                        </td>
+                        <td class="fixture-score">
+                            <span class="vs-text">VS</span>
+                        </td>
+                        <td class="away-team">
+                            <div class="team-name">紐卡素</div>
+                        </td>
+                        <td class="fixture-status">
+                            <span class="status-badge status-ns">
+                                Not Started
+                            </span>
+                        </td>
+                        <td class="fixture-venue">
+                            <span class="venue-name">Etihad Stadium</span>
+                            <span class="venue-city">Manchester</span>
+                        </td>
+                        <td class="fixture-actions">
+                            <button class="action-btn view-btn" onclick="viewFixture('1379234')">
+                                查看
+                            </button>
+                            <button class="action-btn share-btn" onclick="shareFixture('1379234')">
+                                分享
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="fixture-row" 
+                        data-date="2026-02-22"
+                        data-time="14:00"
+                        data-status="NS"
+                        data-home-team="水晶宮"
+                        data-away-team="狼隊">
+                        <td class="fixture-date">
+                            02月22日
+                        </td>
+                        <td class="fixture-time">
+                            14:00
+                        </td>
+                        <td class="home-team">
+                            <div class="team-name">水晶宮</div>
+                        </td>
+                        <td class="fixture-score">
+                            <span class="vs-text">VS</span>
+                        </td>
+                        <td class="away-team">
+                            <div class="team-name">狼隊</div>
+                        </td>
+                        <td class="fixture-status">
+                            <span class="status-badge status-ns">
+                                Not Started
+                            </span>
+                        </td>
+                        <td class="fixture-venue">
+                            <span class="venue-name">Selhurst Park</span>
+                            <span class="venue-city">London</span>
+                        </td>
+                        <td class="fixture-actions">
+                            <button class="action-btn view-btn" onclick="viewFixture('1379232')">
+                                查看
+                            </button>
+                            <button class="action-btn share-btn" onclick="shareFixture('1379232')">
+                                分享
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="fixture-row" 
+                        data-date="2026-02-22"
+                        data-time="14:00"
+                        data-status="NS"
+                        data-home-team="諾定咸森林"
+                        data-away-team="利物浦">
+                        <td class="fixture-date">
+                            02月22日
+                        </td>
+                        <td class="fixture-time">
+                            14:00
+                        </td>
+                        <td class="home-team">
+                            <div class="team-name">諾定咸森林</div>
+                        </td>
+                        <td class="fixture-score">
+                            <span class="vs-text">VS</span>
+                        </td>
+                        <td class="away-team">
+                            <div class="team-name">利物浦</div>
+                        </td>
+                        <td class="fixture-status">
+                            <span class="status-badge status-ns">
+                                Not Started
+                            </span>
+                        </td>
+                        <td class="fixture-venue">
+                            <span class="venue-name">City Ground</span>
+                            <span class="venue-city">Nottingham</span>
+                        </td>
+                        <td class="fixture-actions">
+                            <button class="action-btn view-btn" onclick="viewFixture('1379235')">
+                                查看
+                            </button>
+                            <button class="action-btn share-btn" onclick="shareFixture('1379235')">
+                                分享
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="fixture-row" 
+                        data-date="2026-02-22"
+                        data-time="14:00"
+                        data-status="NS"
+                        data-home-team="新特蘭"
+                        data-away-team="富咸">
+                        <td class="fixture-date">
+                            02月22日
+                        </td>
+                        <td class="fixture-time">
+                            14:00
+                        </td>
+                        <td class="home-team">
+                            <div class="team-name">新特蘭</div>
+                        </td>
+                        <td class="fixture-score">
+                            <span class="vs-text">VS</span>
+                        </td>
+                        <td class="away-team">
+                            <div class="team-name">富咸</div>
+                        </td>
+                        <td class="fixture-status">
+                            <span class="status-badge status-ns">
+                                Not Started
+                            </span>
+                        </td>
+                        <td class="fixture-venue">
+                            <span class="venue-name">Stadium of Light</span>
+                            <span class="venue-city">Sunderland</span>
+                        </td>
+                        <td class="fixture-actions">
+                            <button class="action-btn view-btn" onclick="viewFixture('1379236')">
+                                查看
+                            </button>
+                            <button class="action-btn share-btn" onclick="shareFixture('1379236')">
+                                分享
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="fixture-row" 
+                        data-date="2026-02-22"
+                        data-time="16:30"
+                        data-status="NS"
+                        data-home-team="熱刺"
+                        data-away-team="阿仙奴">
+                        <td class="fixture-date">
+                            02月22日
+                        </td>
+                        <td class="fixture-time">
+                            16:30
+                        </td>
+                        <td class="home-team">
+                            <div class="team-name">熱刺</div>
+                        </td>
+                        <td class="fixture-score">
+                            <span class="vs-text">VS</span>
+                        </td>
+                        <td class="away-team">
+                            <div class="team-name">阿仙奴</div>
+                        </td>
+                        <td class="fixture-status">
+                            <span class="status-badge status-ns">
+                                Not Started
+                            </span>
+                        </td>
+                        <td class="fixture-venue">
+                            <span class="venue-name">Tottenham Hotspur Stadium</span>
+                            <span class="venue-city">London</span>
+                        </td>
+                        <td class="fixture-actions">
+                            <button class="action-btn view-btn" onclick="viewFixture('1379237')">
+                                查看
+                            </button>
+                            <button class="action-btn share-btn" onclick="shareFixture('1379237')">
+                                分享
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 數據統計 -->
+        <div class="league-stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">未開始</div>
+                <div class="stat-value">
+                    9
+                </div>
+                <div class="stat-percent">
+                    100.0%
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-title">進行中</div>
+                <div class="stat-value">
+                    0
+                </div>
+                <div class="stat-percent">
+                    0.0%
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-title">已結束</div>
+                <div class="stat-value">
+                    0
+                </div>
+                <div class="stat-percent">
+                    0.0%
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-title">平均進球</div>
+                <div class="stat-value">
+                        0
+                </div>
+                <div class="stat-percent">每場</div>
+            </div>
+        </div>
+</div>
+
+<!-- 日期分佈圖 -->
+<div class="date-distribution">
+    <h3>賽事日期分佈</h3>
+    <div class="distribution-chart">
+        
+        <div class="chart-item">
+            <div class="chart-date">02月21日</div>
+            <div class="chart-bar">
+                <div class="bar-fill" style="height: 100px;"></div>
+                <div class="bar-count">5</div>
+            </div>
+        </div>
+        <div class="chart-item">
+            <div class="chart-date">02月22日</div>
+            <div class="chart-bar">
+                <div class="bar-fill" style="height: 80px;"></div>
+                <div class="bar-count">4</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .league-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .league-info-card {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    
+    .league-icon {
+        font-size: 3rem;
+        background: linear-gradient(135deg, #3498db, #2ecc71);
+        color: white;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .league-details h2 {
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+    }
+    
+    .league-country {
+        color: #666;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .league-stats {
+        display: flex;
+        gap: 1.5rem;
+    }
+    
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .stat-value {
+        font-weight: 600;
+        color: #3498db;
+    }
+    
+    .league-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .back-btn, .api-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .back-btn {
+        background: #f8f9fa;
+        color: #333;
+        border: 1px solid #ddd;
+    }
+    
+    .back-btn:hover {
+        background: #e9ecef;
+    }
+    
+    .api-btn {
+        background: #3498db;
+        color: white;
+        border: 1px solid #3498db;
+    }
+    
+    .api-btn:hover {
+        background: #2980b9;
+    }
+    
+    .league-filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        flex-wrap: wrap;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-width: 150px;
+    }
+    
+    .filter-group label {
+        font-weight: 600;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .filter-select {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+    }
+    
+    .filter-select:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+    
+    .league-fixtures {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .fixtures-table {
+        overflow-x: auto;
+        margin-bottom: 2rem;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    th {
+        background: #f8f9fa;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+    }
+    
+    td {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .fixture-row:hover {
+        background: #f8f9fa;
+    }
+    
+    .fixture-date, .fixture-time {
+        white-space: nowrap;
+        font-weight: 600;
+    }
+    
+    .home-team, .away-team {
+        min-width: 150px;
+    }
+    
+    .team-name {
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+    }
+    
+    .team-country {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .fixture-score {
+        text-align: center;
+        min-width: 80px;
+    }
+    
+    .score {
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+    
+    .home-score {
+        color: #3498db;
+    }
+    
+    .away-score {
+        color: #e74c3c;
+    }
+    
+    .score-separator {
+        margin: 0 0.5rem;
+        font-weight: 700;
+        color: #666;
+    }
+    
+    .vs-text {
+        color: #666;
+        font-weight: 700;
+    }
+    
+    .fixture-status {
+        min-width: 100px;
+    }
+    
+    .status-badge {
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .status-ns {
+        background: #95a5a6;
+        color: white;
+    }
+    
+    .status-1h, .status-ht, .status-2h, .status-et, .status-bt, .status-p {
+        background: #e74c3c;
+        color: white;
+    }
+    
+    .status-ft {
+        background: #27ae60;
+        color: white;
+    }
+    
+    .fixture-venue {
+        min-width: 150px;
+    }
+    
+    .venue-name {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+    }
+    
+    .venue-city {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .no-venue {
+        color: #95a5a6;
+        font-style: italic;
+    }
+    
+    .fixture-actions {
+        min-width: 120px;
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .action-btn {
+        padding: 0.3rem 0.8rem;
+        border: 1px solid #ddd;
+        background: white;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .view-btn:hover {
+        background: #3498db;
+        color: white;
+        border-color: #3498db;
+    }
+    
+    .share-btn:hover {
+        background: #9b59b6;
+        color: white;
+        border-color: #9b59b6;
+    }
+    
+    .league-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        text-align: center;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .stat-title {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #3498db;
+        margin-bottom: 0.3rem;
+    }
+    
+    .stat-percent {
+        font-size: 0.9rem;
+        color: #95a5a6;
+    }
+    
+    .no-fixtures {
+        text-align: center;
+        padding: 3rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .no-data-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+    
+    .date-distribution {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .distribution-chart {
+        display: flex;
+        align-items: flex-end;
+        gap: 1rem;
+        height: 200px;
+        padding: 1rem;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        margin-top: 1rem;
+        overflow-x: auto;
+    }
+    
+    .chart-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .chart-date {
+        font-size: 0.8rem;
+        color: #666;
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+    }
+    
+    .chart-bar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .bar-fill {
+        width: 30px;
+        background: linear-gradient(to top, #3498db, #2ecc71);
+        border-radius: 4px 4px 0 0;
+        min-height: 10px;
+    }
+    
+    .bar-count {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    @media (max-width: 768px) {
+        .league-header {
+            flex-direction: column;
+            gap: 1.5rem;
+            text-align: center;
+        }
+        
+        .league-info-card {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .league-stats {
+            justify-content: center;
+        }
+        
+        .league-filters {
+            flex-direction: column;
+        }
+        
+        .filter-group {
+            min-width: 100%;
+        }
+        
+        table {
+            display: block;
+        }
+        
+        th, td {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .fixture-actions {
+            flex-direction: column;
+        }
+        
+        .league-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 狀態篩選
+    document.getElementById('status-filter').addEventListener('change', function() {
+        filterFixtures();
+    });
+    
+    // 日期篩選
+    document.getElementById('date-filter').addEventListener('change', function() {
+        filterFixtures();
+    });
+    
+    // 排序篩選
+    document.getElementById('sort-filter').addEventListener('change', function() {
+        sortFixtures();
+    });
+    
+    // 初始化
+    filterFixtures();
+});
+
+function filterFixtures() {
+    const statusFilter = document.getElementById('status-filter').value;
+    const dateFilter = document.getElementById('date-filter').value;
+    const rows = document.querySelectorAll('.fixture-row');
+    
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    
+    const weekLater = new Date(now);
+    weekLater.setDate(weekLater.getDate() + 7);
+    const weekLaterStr = weekLater.toISOString().split('T')[0];
+    
+    rows.forEach(row => {
+        const status = row.dataset.status;
+        const date = row.dataset.date;
+        
+        let statusMatch = true;
+        let dateMatch = true;
+        
+        // 狀態篩選
+        if (statusFilter === 'live') {
+            statusMatch = ['1H', 'HT', '2H', 'ET', 'BT', 'P'].includes(status);
+        } else if (statusFilter === 'NS') {
+            statusMatch = status === 'NS';
+        } else if (statusFilter === 'FT') {
+            statusMatch = status === 'FT';
+        }
+        
+        // 日期篩選
+        if (dateFilter === 'today') {
+            dateMatch = date === today;
+        } else if (dateFilter === 'tomorrow') {
+            dateMatch = date === tomorrowStr;
+        } else if (dateFilter === 'week') {
+            dateMatch = date >= today && date <= weekLaterStr;
+        }
+        
+        // 顯示/隱藏行
+        row.style.display = (statusMatch && dateMatch) ? '' : 'none';
+    });
+}
+
+function sortFixtures() {
+    const sortFilter = document.getElementById('sort-filter').value;
+    const tbody = document.querySelector('tbody');
+    const rows = Array.from(document.querySelectorAll('.fixture-row'));
+    
+    rows.sort((a, b) => {
+        const dateA = a.dataset.date;
+        const timeA = a.dataset.time;
+        const dateB = b.dataset.date;
+        const timeB = b.dataset.time;
+        
+        if (sortFilter === 'date_asc') {
+            if (dateA !== dateB) return dateA.localeCompare(dateB);
+            return timeA.localeCompare(timeB);
+        } else if (sortFilter === 'date_desc') {
+            if (dateA !== dateB) return dateB.localeCompare(dateA);
+            return timeB.localeCompare(timeA);
+        } else if (sortFilter === 'time_asc') {
+            if (timeA !== timeB) return timeA.localeCompare(timeB);
+            return dateA.localeCompare(dateB);
+        } else if (sortFilter === 'time_desc') {
+            if (timeA !== timeB) return timeB.localeCompare(timeA);
+            return dateB.localeCompare(dateA);
+        }
+        
+        return 0;
+    });
+    
+    // 重新插入排序後的行
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+function viewFixture(fixtureId) {
+    alert('賽事詳細功能開發中，將顯示更多統計數據。');
+    // 可以實現跳轉到詳細頁面或顯示模態框
+}
+
+function shareFixture(fixtureId) {
+    const row = document.querySelector(`.fixture-row[data-home-team*="${fixtureId}"]`) || 
+                 document.querySelector(`[data-fixture-id="${fixtureId}"]`);
+    
+    if (!row) return;
+    
+    const homeTeam = row.dataset.homeTeam;
+    const awayTeam = row.dataset.awayTeam;
+    const leagueName = '澳大利亞超級聯賽';
+    const date = row.dataset.date;
+    const time = row.dataset.time;
+    
+    const shareText = `⚽ ${leagueName}\n🏠 ${homeTeam} vs ${awayTeam}\n📅 ${date} ${time}\n🔗 ${window.location.href}`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: '足球賽事',
+            text: shareText,
+            url: window.location.href
+        });
+    } else {
+        navigator.clipboard.writeText(shareText)
+            .then(() => alert('賽事信息已複製到剪貼板！'))
+            .catch(err => console.error('複製失敗:', err));
+    }
+}
+</script>
+    </main>
+
+    <!-- 頁腳 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>足球賽事數據中心</h3>
+                    <p>提供全球59個主要聯賽的實時賽事信息</p>
+                    <p>所有數據自動更新，繁體中文界面</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>數據來源</h3>
+                    <p>數據來自 API-Football</p>
+                    <p>更新頻率：每6小時自動同步</p>
+                    <p>最後更新：2026-02-21 14:20:53</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>技術信息</h3>
+                    <p>靜態網站生成器：Python + Jinja2</p>
+                    <p>數據庫：SQLite (fixtures.db)</p>
+                    <p>託管：GitHub Pages</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>鏈接</h3>
+                    <p>
+                        <a href="/api/fixtures.json" target="_blank">JSON API</a>
+                    </p>
+                    <p>
+                        <a href="https://github.com/daddypig4559-svg/football-fixtures" target="_blank">GitHub 倉庫</a>
+                    </p>
+                    <p>
+                        <a href="https://daddypig4559-svg.github.io/football-fixtures/" target="_blank">網站主頁</a>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 足球賽事數據中心 | 此網站為開源項目，數據僅供參考</p>
+                <p>自動生成於 2026-02-21 14:20:53</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="/js/app.js"></script>
+    
+    <!-- 內聯樣式 -->
+    <style>
+        .main-nav {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .logo-icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .nav-link {
+            color: #ecf0f1;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .search-box {
+            display: flex;
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        #search-input {
+            border: none;
+            padding: 0.5rem 1rem;
+            width: 200px;
+            outline: none;
+        }
+        
+        .search-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+        
+        .last-updated {
+            font-size: 0.9rem;
+            color: #bdc3c7;
+        }
+        
+        .quick-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            text-align: center;
+            background: rgba(255,255,255,0.1);
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .stat-number {
+            display: block;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            color: #3498db;
+        }
+        
+        .footer-section p {
+            margin-bottom: 0.5rem;
+            opacity: 0.8;
+        }
+        
+        .footer-section a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .footer-section a:hover {
+            text-decoration: underline;
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 1rem;
+            text-align: center;
+            opacity: 0.7;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .nav-links {
+                justify-content: center;
+            }
+            
+            .nav-actions {
+                flex-direction: column;
+            }
+            
+            #search-input {
+                width: 100%;
+            }
+            
+            .quick-stats {
+                gap: 1rem;
+            }
+            
+            .stat-item {
+                padding: 0.5rem 1rem;
+            }
+        }
+    </style>
+</body>
+</html>

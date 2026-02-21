@@ -1,0 +1,809 @@
+{% extends "base.html.j2" %}
+
+{% block title %}足球賽事數據中心 - 首頁{% endblock %}
+
+{% block header_title %}足球賽事數據中心{% endblock %}
+
+{% block header_subtitle %}
+實時更新的足球賽事信息，涵蓋全球59個主要聯賽，提供繁體中文界面
+{% endblock %}
+
+{% block content %}
+<!-- 快速篩選 -->
+<div class="quick-filters">
+    <div class="filter-buttons">
+        <button class="filter-btn active" data-filter="all">全部賽事</button>
+        <button class="filter-btn" data-filter="today">今日賽事</button>
+        <button class="filter-btn" data-filter="tomorrow">明日賽事</button>
+        <button class="filter-btn" data-filter="live">進行中</button>
+    </div>
+    
+    <div class="view-options">
+        <span>視圖:</span>
+        <button class="view-btn active" data-view="grid">網格</button>
+        <button class="view-btn" data-view="list">列表</button>
+        <button class="view-btn" data-view="calendar">日曆</button>
+    </div>
+</div>
+
+<!-- 日期導航 -->
+<div class="date-navigation">
+    <h3>按日期瀏覽</h3>
+    <div class="date-list">
+        {% for date, fixtures in fixtures_by_date.items() %}
+        <div class="date-item" data-date="{{ date }}">
+            <span class="date-day">{{ date|format_date }}</span>
+            <span class="date-count">{{ fixtures|length }}場</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 聯賽導航 -->
+<div class="league-navigation">
+    <h3>按聯賽瀏覽</h3>
+    <div class="league-list">
+        {% for league_id, league_data in fixtures_by_league.items() %}
+        <div class="league-item" data-league-id="{{ league_id }}">
+            <span class="league-name">{{ league_data.name }}</span>
+            <span class="league-count">{{ league_data.fixtures|length }}場</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 賽事列表 -->
+<div class="fixtures-section">
+    <h2>賽事列表 <small>(共{{ total_fixtures }}場賽事)</small></h2>
+    
+    {% if fixtures_by_date %}
+        {% for date, date_fixtures in fixtures_by_date.items() %}
+        <div class="date-group" data-date="{{ date }}">
+            <h3 class="date-header">
+                {{ date|format_date }} ({{ date }})
+                <span class="fixture-count">{{ date_fixtures|length }}場賽事</span>
+            </h3>
+            
+            <div class="fixtures-grid">
+                {% for fixture in date_fixtures %}
+                <div class="fixture-card" 
+                     data-date="{{ date }}"
+                     data-league-id="{{ fixture.league_api_id }}"
+                     data-league="{{ fixture.league_name_tc }}"
+                     data-home-team="{{ fixture.home_team_name_tc }}"
+                     data-away-team="{{ fixture.away_team_name_tc }}"
+                     data-time="{{ fixture.event_time_formatted }}"
+                     data-status="{{ 'live' if fixture.status_short in ['1H', 'HT', '2H', 'ET', 'BT', 'P'] else 'scheduled' }}"
+                     data-fixture-id="{{ fixture.api_id }}">
+                    
+                    <div class="fixture-header">
+                        <div class="league-info">
+                            <span class="league-badge {{ fixture.league_name_tc|league_icon }}">
+                                {{ fixture.league_name_tc }}
+                            </span>
+                            {% if fixture.league_country %}
+                            <span class="country-flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿 {{ fixture.league_country }}</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="fixture-time">
+                            <span class="time-icon">🕒</span>
+                            <span class="time-text">{{ fixture.event_time_formatted }}</span>
+                            {% if fixture.status_short != 'NS' %}
+                            <span class="match-status {{ fixture.status_short|lower }}">
+                                {{ fixture.status_long }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="fixture-teams">
+                        <div class="team home-team">
+                            <div class="team-name">{{ fixture.home_team_name_tc }}</div>
+                            {% if fixture.home_team_country %}
+                            <div class="team-country">{{ fixture.home_team_country }}</div>
+                            {% endif %}
+                            {% if fixture.goals_home is not none %}
+                            <div class="team-score">{{ fixture.goals_home }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="vs-separator">
+                            <span class="vs-text">VS</span>
+                            {% if fixture.status_short in ['1H', 'HT', '2H', 'ET', 'BT', 'P'] %}
+                            <span class="live-badge">LIVE</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="team away-team">
+                            <div class="team-name">{{ fixture.away_team_name_tc }}</div>
+                            {% if fixture.away_team_country %}
+                            <div class="team-country">{{ fixture.away_team_country }}</div>
+                            {% endif %}
+                            {% if fixture.goals_away is not none %}
+                            <div class="team-score">{{ fixture.goals_away }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="fixture-details">
+                        {% if fixture.venue_name %}
+                        <div class="detail-item">
+                            <span class="detail-icon">🏟️</span>
+                            <span class="detail-text">{{ fixture.venue_name }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if fixture.venue_city %}
+                        <div class="detail-item">
+                            <span class="detail-icon">📍</span>
+                            <span class="detail-text">{{ fixture.venue_city }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if fixture.round %}
+                        <div class="detail-item">
+                            <span class="detail-icon">📅</span>
+                            <span class="detail-text">{{ fixture.round }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if fixture.season %}
+                        <div class="detail-item">
+                            <span class="detail-icon">📋</span>
+                            <span class="detail-text">{% if fixture.season %}賽季 {{ fixture.season }}{% else %}賽季未知{% endif %}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="fixture-actions">
+                        <button class="action-btn share-btn" onclick="shareFixture('{{ fixture.api_id }}')">
+                            <span class="btn-icon">📤</span>分享
+                        </button>
+                        
+                        <button class="action-btn details-btn" onclick="showFixtureDetails('{{ fixture.api_id }}')">
+                            <span class="btn-icon">📊</span>詳情
+                        </button>
+                        
+                        {% if fixture.raw_data %}
+                        <a href="/api/fixture/{{ fixture.api_id }}.json" class="action-btn api-btn" target="_blank">
+                            <span class="btn-icon">🔗</span>JSON
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-fixtures">
+            <div class="no-data-icon">📅</div>
+            <h3>暫無賽事數據</h3>
+            <p>在未來{{ days_ahead }}天內沒有找到賽事數據</p>
+            <p>請檢查數據庫同步狀態或稍後再試</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- 統計面板 -->
+<div class="stats-panel">
+    <h2>數據統計</h2>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">⚽</div>
+            <div class="stat-value">{{ total_fixtures }}</div>
+            <div class="stat-label">總賽事數</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">🏆</div>
+            <div class="stat-value">{{ total_leagues }}</div>
+            <div class="stat-label">聯賽數量</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-value">{{ fixtures_by_date|length }}</div>
+            <div class="stat-label">比賽日</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">🔄</div>
+            <div class="stat-value">{{ generated_at[:16] }}</div>
+            <div class="stat-label">最後更新</div>
+        </div>
+    </div>
+</div>
+
+<!-- 聯賽分佈圖 -->
+<div class="league-distribution">
+    <h2>聯賽分佈</h2>
+    <div class="distribution-list">
+        {% for league_id, league_data in fixtures_by_league.items() %}
+        <div class="league-dist-item">
+            <div class="league-name">{{ league_data.name }}</div>
+            <div class="distribution-bar">
+                <div class="bar-fill" style="width: {{ (league_data.fixtures|length / total_fixtures * 100)|round(1) }}%">
+                    <span class="bar-text">{{ league_data.fixtures|length }}場</span>
+                </div>
+            </div>
+            <div class="league-percent">{{ (league_data.fixtures|length / total_fixtures * 100)|round(1) }}%</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .quick-filters {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .filter-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid #ddd;
+        background: white;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-btn:hover {
+        background: #f8f9fa;
+    }
+    
+    .filter-btn.active {
+        background: #3498db;
+        color: white;
+        border-color: #3498db;
+    }
+    
+    .view-options {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .view-btn {
+        padding: 0.3rem 0.8rem;
+        border: 1px solid #ddd;
+        background: white;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .view-btn.active {
+        background: #3498db;
+        color: white;
+        border-color: #3498db;
+    }
+    
+    .date-navigation, .league-navigation {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .date-list, .league-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .date-item, .league-item {
+        padding: 0.5rem 1rem;
+        background: #f8f9fa;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .date-item:hover, .league-item:hover {
+        background: #3498db;
+        color: white;
+    }
+    
+    .date-item.active, .league-item.active {
+        background: #3498db;
+        color: white;
+    }
+    
+    .date-count, .league-count {
+        background: rgba(0,0,0,0.1);
+        padding: 0.1rem 0.5rem;
+        border-radius: 10px;
+        font-size: 0.8rem;
+    }
+    
+    .fixtures-section {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .date-group {
+        margin-bottom: 2rem;
+    }
+    
+    .date-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #3498db;
+    }
+    
+    .fixture-count {
+        background: #3498db;
+        color: white;
+        padding: 0.2rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+    
+    .fixtures-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1rem;
+    }
+    
+    .fixture-card {
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .fixture-card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    
+    .league-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .league-badge {
+        background: #3498db;
+        color: white;
+        padding: 0.2rem 0.8rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .country-flag {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .fixture-time {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .match-status {
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .match-status.live {
+        background: #e74c3c;
+        color: white;
+    }
+    
+    .match-status.ns {
+        background: #95a5a6;
+        color: white;
+    }
+    
+    .fixture-teams {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 1rem 0;
+    }
+    
+    .team {
+        text-align: center;
+        flex: 1;
+    }
+    
+    .team-name {
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 0.3rem;
+    }
+    
+    .team-country {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .team-score {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #3498db;
+        margin-top: 0.5rem;
+    }
+    
+    .vs-separator {
+        text-align: center;
+        padding: 0 1rem;
+    }
+    
+    .vs-text {
+        font-weight: 700;
+        color: #666;
+    }
+    
+    .live-badge {
+        display: block;
+        background: #e74c3c;
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-top: 0.3rem;
+    }
+    
+    .fixture-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+        margin: 1rem 0;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .fixture-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .action-btn {
+        flex: 1;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        background: white;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .action-btn:hover {
+        background: #f8f9fa;
+    }
+    
+    .share-btn:hover {
+        background: #3498db;
+        color: white;
+        border-color: #3498db;
+    }
+    
+    .details-btn:hover {
+        background: #27ae60;
+        color: white;
+        border-color: #27ae60;
+    }
+    
+    .api-btn:hover {
+        background: #9b59b6;
+        color: white;
+        border-color: #9b59b6;
+    }
+    
+    .no-fixtures {
+        text-align: center;
+        padding: 3rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .no-data-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+    
+    .stats-panel, .league-distribution {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .stat-card {
+        text-align: center;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #3498db;
+        margin-bottom: 0.5rem;
+    }
+    
+    .league-dist-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.8rem;
+    }
+    
+    .league-name {
+        min-width: 150px;
+        font-weight: 600;
+    }
+    
+    .distribution-bar {
+        flex: 1;
+        height: 20px;
+        background: #f0f0f0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #3498db, #2ecc71);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 10px;
+        transition: width 1s ease;
+    }
+    
+    .bar-text {
+        color: white;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .league-percent {
+        min-width: 60px;
+        text-align: right;
+        font-weight: 600;
+        color: #3498db;
+    }
+    
+    @media (max-width: 768px) {
+        .quick-filters {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .fixtures-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .fixture-teams {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .team {
+            width: 100%;
+        }
+        
+        .vs-separator {
+            padding: 0.5rem 0;
+        }
+        
+        .league-dist-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .distribution-bar {
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+// 初始化頁面交互
+document.addEventListener('DOMContentLoaded', function() {
+    // 篩選按鈕
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filter = this.dataset.filter;
+            filterFixtures(filter);
+        });
+    });
+    
+    // 視圖按鈕
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const view = this.dataset.view;
+            changeView(view);
+        });
+    });
+    
+    // 日期項目
+    document.querySelectorAll('.date-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.date-item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            
+            const date = this.dataset.date;
+            showDateFixtures(date);
+        });
+    });
+    
+    // 聯賽項目
+    document.querySelectorAll('.league-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.league-item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            
+            const leagueId = this.dataset.leagueId;
+            showLeagueFixtures(leagueId);
+        });
+    });
+});
+
+function filterFixtures(filter) {
+    const fixtures = document.querySelectorAll('.fixture-card');
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    
+    fixtures.forEach(card => {
+        const cardDate = card.dataset.date;
+        const cardStatus = card.dataset.status;
+        
+        switch(filter) {
+            case 'all':
+                card.style.display = 'block';
+                break;
+            case 'today':
+                card.style.display = cardDate === today ? 'block' : 'none';
+                break;
+            case 'tomorrow':
+                card.style.display = cardDate === tomorrowStr ? 'block' : 'none';
+                break;
+            case 'live':
+                card.style.display = cardStatus === 'live' ? 'block' : 'none';
+                break;
+        }
+    });
+}
+
+function changeView(view) {
+    const container = document.querySelector('.fixtures-grid');
+    if (!container) return;
+    
+    container.className = 'fixtures-' + view;
+    
+    // 更新樣式
+    if (view === 'list') {
+        container.style.gridTemplateColumns = '1fr';
+    } else if (view === 'grid') {
+        container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(350px, 1fr))';
+    } else if (view === 'calendar') {
+        container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
+    }
+}
+
+function showDateFixtures(date) {
+    const dateGroups = document.querySelectorAll('.date-group');
+    dateGroups.forEach(group => {
+        if (group.dataset.date === date) {
+            group.style.display = 'block';
+        } else {
+            group.style.display = 'none';
+        }
+    });
+}
+
+function showLeagueFixtures(leagueId) {
+    const fixtures = document.querySelectorAll('.fixture-card');
+    fixtures.forEach(card => {
+        if (card.dataset.leagueId === leagueId) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function shareFixture(fixtureId) {
+    const card = document.querySelector(`[data-fixture-id="${fixtureId}"]`);
+    if (!card) return;
+    
+    const homeTeam = card.dataset.homeTeam;
+    const awayTeam = card.dataset.awayTeam;
+    const league = card.dataset.league;
+    const time = card.dataset.time;
+    
+    const shareText = `⚽ ${league}: ${homeTeam} vs ${awayTeam}\n🕒 ${time}\n🔗 ${window.location.href}`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: '足球賽事',
+            text: shareText,
+            url: window.location.href
+        });
+    } else {
+        navigator.clipboard.writeText(shareText)
+            .then(() => alert('賽事信息已複製到剪貼板！'))
+            .catch(err => console.error('複製失敗:', err));
+    }
+}
+
+function showFixtureDetails(fixtureId) {
+    alert('詳細功能開發中，將顯示賽事詳細統計數據。');
+    // 未來可以實現彈出模態框顯示詳細數據
+}
+</script>
+{% endblock %}

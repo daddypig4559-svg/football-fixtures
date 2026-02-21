@@ -1,0 +1,237 @@
+# 足球賽事數據中心 - 配置文件
+# 版本: 1.0.0
+# 更新時間: 2026-02-21
+
+# 系統配置
+system:
+  name: "足球賽事數據中心"
+  version: "1.0.0"
+  description: "實時更新的足球賽事信息，涵蓋全球59個主要聯賽"
+  language: "zh-Hant"  # 繁體中文
+  timezone: "Asia/Hong_Kong"
+  
+# 數據庫配置
+database:
+  path: "../api_football_sync/fixtures.db"  # 相對路徑
+  backup_path: "./data/backups/"
+  backup_days: 7  # 保留備份天數
+  
+# 賽事配置
+fixtures:
+  days_ahead: 7  # 顯示未來多少天的賽事
+  target_leagues: 59  # 目標聯賽數量
+  update_interval: 6  # 更新間隔（小時）
+  
+  # 賽事狀態過濾
+  include_status:
+    - "NS"    # 未開始
+    - "1H"    # 上半場
+    - "HT"    # 半場休息
+    - "2H"    # 下半場
+    - "ET"    # 加時賽
+    - "BT"    # 中場休息
+    - "P"     # 罰球
+    - "SUSP"  # 暫停
+    - "INT"   # 中斷
+    - "ABD"   # 放棄
+    - "AWD"   # 判決
+    - "WO"    # 棄權
+    
+  # 排除的狀態
+  exclude_status:
+    - "CAN"   # 取消
+    - "PST"   # 推遲
+    
+# 網站配置
+website:
+  title: "足球賽事數據中心"
+  subtitle: "實時更新的足球賽事信息（繁體中文）"
+  author: "Football Fixtures Hub"
+  
+  # SEO配置
+  seo:
+    description: "提供全球59個主要聯賽的實時賽事信息，繁體中文界面，自動更新"
+    keywords: "足球,賽事,賽程,比分,聯賽,球隊,繁體中文,數據,API"
+    
+  # 社交媒體
+  social:
+    twitter: "@football_fixtures"
+    github: "daddypig4559-svg/football-fixtures"
+    
+  # 頁面配置
+  pages:
+    index: "index.html"
+    leagues: "leagues/"
+    api: "api/"
+    
+# API配置
+api:
+  enabled: true
+  endpoints:
+    fixtures: "/api/fixtures.json"
+    leagues: "/api/leagues.json"
+    dates: "/api/dates.json"
+    stats: "/api/stats.json"
+    
+  # 響應配置
+  response:
+    default_format: "json"
+    pretty_print: true
+    cors_enabled: true
+    
+# 模板配置
+templates:
+  engine: "jinja2"
+  directory: "./templates/"
+  auto_reload: false
+  
+  # 模板變量
+  variables:
+    site_name: "足球賽事數據中心"
+    site_url: "https://daddypig4559-svg.github.io/football-fixtures/"
+    current_year: 2026
+    
+# 部署配置
+deployment:
+  # GitHub Pages配置
+  github_pages:
+    branch: "gh-pages"
+    directory: "./public"
+    cname: ""  # 自定義域名（可選）
+    
+  # GitHub Actions配置
+  github_actions:
+    schedule: "0 */6 * * *"  # 每6小時
+    workflow_file: ".github/workflows/deploy.yml"
+    
+  # 本地部署配置
+  local:
+    script: "./scripts/deploy.sh"
+    log_file: "./deployment.log"
+    
+# 通知配置
+notifications:
+  enabled: false
+  
+  # 通知方式
+  methods:
+    - type: "github"
+      events: ["deploy_success", "deploy_failure"]
+      
+    - type: "email"
+      enabled: false
+      recipients: []
+      
+# 監控配置
+monitoring:
+  enabled: true
+  
+  # 健康檢查
+  health_checks:
+    - name: "網站可訪問性"
+      url: "https://daddypig4559-svg.github.io/football-fixtures/"
+      interval: 3600  # 每小時檢查
+      
+    - name: "API可用性"
+      url: "https://daddypig4559-svg.github.io/football-fixtures/api/fixtures.json"
+      interval: 1800  # 每30分鐘檢查
+      
+  # 性能監控
+  performance:
+    enabled: true
+    metrics: ["load_time", "file_size", "cache_hits"]
+    
+# 安全配置
+security:
+  # 內容安全策略
+  csp:
+    enabled: true
+    directives:
+      default-src: "'self'"
+      script-src: "'self' 'unsafe-inline'"
+      style-src: "'self' 'unsafe-inline'"
+      img-src: "'self' data: https:"
+      
+  # HTTP安全頭部
+  headers:
+    x-frame-options: "DENY"
+    x-content-type-options: "nosniff"
+    x-xss-protection: "1; mode=block"
+    
+  # 訪問控制
+  access_control:
+    allow_origins: ["*"]
+    allow_methods: ["GET", "HEAD"]
+    
+# 緩存配置
+cache:
+  enabled: true
+  duration: 3600  # 1小時
+  
+  # 緩存策略
+  strategies:
+    static_files: 86400  # 24小時
+    api_responses: 1800  # 30分鐘
+    html_pages: 3600     # 1小時
+    
+# 日誌配置
+logging:
+  enabled: true
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  
+  # 日誌輸出
+  outputs:
+    - type: "file"
+      path: "./logs/app.log"
+      max_size: "10MB"
+      backup_count: 5
+      
+    - type: "console"
+      enabled: true
+      
+# 調試配置
+debug:
+  enabled: false
+  show_errors: false
+  template_debug: false
+  
+# 備份配置
+backup:
+  enabled: true
+  schedule: "0 2 * * *"  # 每天凌晨2點
+  retention: 7  # 保留7天
+  
+  # 備份內容
+  include:
+    - "config/"
+    - "templates/"
+    - "scripts/"
+    - "data/"
+    
+# 更新配置
+update:
+  auto_check: true
+  check_interval: 86400  # 每天檢查
+  
+  # 更新源
+  sources:
+    - name: "API-Football數據"
+      type: "external"
+      url: "https://api-football.com/"
+      
+    - name: "系統代碼"
+      type: "git"
+      url: "https://github.com/daddypig4559-svg/football-fixtures"
+      
+# 實驗性功能
+experimental:
+  realtime_updates: false
+  websocket_support: false
+  pwa_support: false
+  
+  # 功能標誌
+  feature_flags:
+    advanced_search: true
+    live_scores: false
+    predictions: false
+    analytics: false

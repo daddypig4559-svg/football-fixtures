@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}足球賽事數據中心{% endblock %}</title>
+    <meta name="description" content="實時更新的足球賽事信息，涵蓋全球59個主要聯賽，提供繁體中文界面。">
+    <meta name="keywords" content="足球,賽事,賽程,比分,聯賽,球隊,繁體中文">
+    <meta name="author" content="Football Fixtures Hub">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+    {% block extra_css %}{% endblock %}
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% block og_title %}足球賽事數據中心{% endblock %}">
+    <meta property="og:description" content="實時更新的足球賽事信息，涵蓋全球59個主要聯賽">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://daddypig4559-svg.github.io/football-fixtures/">
+    <meta property="og:image" content="https://daddypig4559-svg.github.io/football-fixtures/images/og-image.png">
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="main-nav">
+        <div class="container">
+            <div class="nav-content">
+                <a href="/" class="logo">
+                    <span class="logo-icon">⚽</span>
+                    <span class="logo-text">足球賽事數據中心</span>
+                </a>
+                
+                <div class="nav-links">
+                    <a href="/" class="nav-link active">
+                        首頁
+                    </a>
+                    <a href="#leagues" class="nav-link">
+                        聯賽
+                    </a>
+                    <a href="#today" class="nav-link">
+                        今日賽事
+                    </a>
+                    <a href="/api/fixtures.json" class="nav-link" target="_blank">
+                        JSON API
+                    </a>
+                </div>
+                
+                <div class="nav-actions">
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="搜索球隊或聯賽...">
+                        <button class="search-btn">🔍</button>
+                    </div>
+                    
+                    <div class="last-updated">
+                        更新於: <span id="last-updated">{{ generated_at }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 頁頭 -->
+    <header>
+        <div class="container">
+            <h1>{% block header_title %}足球賽事數據中心{% endblock %}</h1>
+            <p class="subtitle">
+                {% block header_subtitle %}
+                實時更新的足球賽事信息，涵蓋全球59個主要聯賽，提供繁體中文界面
+                {% endblock %}
+            </p>
+            
+            <!-- 快速統計 -->
+            <div class="quick-stats">
+                <div class="stat-item">
+                    <span class="stat-number">{{ total_fixtures|default(0) }}</span>
+                    <span class="stat-label">場賽事</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ total_leagues|default(0) }}</span>
+                    <span class="stat-label">個聯賽</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ days_ahead|default(7) }}</span>
+                    <span class="stat-label">天內</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ generated_at[:10] }}</span>
+                    <span class="stat-label">最新更新</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容 -->
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- 頁腳 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>足球賽事數據中心</h3>
+                    <p>提供全球59個主要聯賽的實時賽事信息</p>
+                    <p>所有數據自動更新，繁體中文界面</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>數據來源</h3>
+                    <p>數據來自 API-Football</p>
+                    <p>更新頻率：每6小時自動同步</p>
+                    <p>最後更新：{{ generated_at }}</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>技術信息</h3>
+                    <p>靜態網站生成器：Python + Jinja2</p>
+                    <p>數據庫：SQLite (fixtures.db)</p>
+                    <p>託管：GitHub Pages</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>鏈接</h3>
+                    <p>
+                        <a href="/api/fixtures.json" target="_blank">JSON API</a>
+                    </p>
+                    <p>
+                        <a href="https://github.com/daddypig4559-svg/football-fixtures" target="_blank">GitHub 倉庫</a>
+                    </p>
+                    <p>
+                        <a href="https://daddypig4559-svg.github.io/football-fixtures/" target="_blank">網站主頁</a>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; {{ generated_at[:4] }} 足球賽事數據中心 | 此網站為開源項目，數據僅供參考</p>
+                <p>自動生成於 {{ generated_at }}</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="/js/app.js"></script>
+    {% block extra_js %}{% endblock %}
+    
+    <!-- 內聯樣式 -->
+    <style>
+        .main-nav {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .logo-icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .nav-link {
+            color: #ecf0f1;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .search-box {
+            display: flex;
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        #search-input {
+            border: none;
+            padding: 0.5rem 1rem;
+            width: 200px;
+            outline: none;
+        }
+        
+        .search-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+        
+        .last-updated {
+            font-size: 0.9rem;
+            color: #bdc3c7;
+        }
+        
+        .quick-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            text-align: center;
+            background: rgba(255,255,255,0.1);
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .stat-number {
+            display: block;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            color: #3498db;
+        }
+        
+        .footer-section p {
+            margin-bottom: 0.5rem;
+            opacity: 0.8;
+        }
+        
+        .footer-section a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .footer-section a:hover {
+            text-decoration: underline;
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 1rem;
+            text-align: center;
+            opacity: 0.7;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .nav-links {
+                justify-content: center;
+            }
+            
+            .nav-actions {
+                flex-direction: column;
+            }
+            
+            #search-input {
+                width: 100%;
+            }
+            
+            .quick-stats {
+                gap: 1rem;
+            }
+            
+            .stat-item {
+                padding: 0.5rem 1rem;
+            }
+        }
+    </style>
+</body>
+</html>

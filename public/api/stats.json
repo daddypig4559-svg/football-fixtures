@@ -1,0 +1,124 @@
+{
+  "status": "success",
+  "generated_at": "2026-02-21T14:20:53.018619",
+  "total_fixtures": 159,
+  "total_leagues": 23,
+  "total_dates": 2,
+  "leagues": [
+    {
+      "id": 40,
+      "name": "ASEAN Championship U19 (World)",
+      "count": 11
+    },
+    {
+      "id": 140,
+      "name": "Copa De La Liga Auf (Uruguay)",
+      "count": 8
+    },
+    {
+      "id": 61,
+      "name": "Ligue 1 (Algeria)",
+      "count": 8
+    },
+    {
+      "id": 62,
+      "name": "Ligue 2 (Algeria)",
+      "count": 3
+    },
+    {
+      "id": 41,
+      "name": "中國League One",
+      "count": 12
+    },
+    {
+      "id": 42,
+      "name": "中國League Two",
+      "count": 11
+    },
+    {
+      "id": 310,
+      "name": "丹麥超",
+      "count": 4
+    },
+    {
+      "id": 305,
+      "name": "卡塔爾星級聯賽",
+      "count": 4
+    },
+    {
+      "id": 262,
+      "name": "墨西哥Liga MX Femenil",
+      "count": 7
+    },
+    {
+      "id": 135,
+      "name": "墨西哥Liga Premier Serie A",
+      "count": 7
+    },
+    {
+      "id": 136,
+      "name": "墨西哥Liga Premier Serie B",
+      "count": 9
+    },
+    {
+      "id": 79,
+      "name": "德乙",
+      "count": 7
+    },
+    {
+      "id": 78,
+      "name": "德乙",
+      "count": 8
+    },
+    {
+      "id": 144,
+      "name": "比甲",
+      "count": 7
+    },
+    {
+      "id": 301,
+      "name": "比甲",
+      "count": 4
+    },
+    {
+      "id": 307,
+      "name": "比甲",
+      "count": 3
+    },
+    {
+      "id": 188,
+      "name": "澳大利亞A-League Women",
+      "count": 5
+    },
+    {
+      "id": 39,
+      "name": "澳大利亞超級聯賽",
+      "count": 9
+    },
+    {
+      "id": 89,
+      "name": "荷乙",
+      "count": 2
+    },
+    {
+      "id": 88,
+      "name": "荷蘭Eredivisie Women",
+      "count": 8
+    },
+    {
+      "id": 94,
+      "name": "葡超",
+      "count": 7
+    },
+    {
+      "id": 179,
+      "name": "蘇超",
+      "count": 6
+    },
+    {
+      "id": 141,
+      "name": "西乙",
+      "count": 9
+    }
+  ]
+}
